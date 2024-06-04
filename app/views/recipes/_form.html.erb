@@ -1,0 +1,9 @@
+<!-- app/views/recipes/_form.html.erb -->
+<%= form_with(model: [@timetable, Recipe.new], url: timetable_recipes_path(@timetable), local: true) do |form| %>
+  <%= form.hidden_field :meal_type %>
+  <div class="mb-3">
+    <%= form.label :content %>
+    <%= form.text_area :content, class: 'form-control' %>
+  </div>
+  <%= form.submit 'Save Recipe', class: 'btn btn-primary' %>
+<% end %>

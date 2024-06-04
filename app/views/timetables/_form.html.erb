@@ -1,0 +1,51 @@
+<%= form_with(model: @timetable, local: true) do |form| %>
+  <% if @timetable.errors.any? %>
+    <div id="error_explanation" class="alert alert-danger">
+      <h4><%= pluralize(@timetable.errors.count, "error") %> prohibited this timetable from being saved:</h4>
+      <ul>
+        <% @timetable.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :week_start_date, class: 'form-label' %>
+    <%= form.date_field :week_start_date, class: 'form-control', value: @start_date %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :end_date, class: 'form-label' %>
+    <%= form.date_field :end_date, class: 'form-control', value: @end_date %>
+  </div>
+
+  <% if @start_date && @end_date %>
+    <% (@start_date..@end_date).each do |date| %>
+      <h2 class="mt-4"><%= date.strftime("%A, %B %d, %Y") %></h2>
+
+      <% %w[breakfast lunch dinner].each do |meal| %>
+        <div class="meal">
+          <h3><%= meal.capitalize %></h3>
+          <%= form.text_area "#{date.strftime("%A").downcase}_#{meal}", class: 'form-control' %>
+          <h4>Recipe</h4>
+          <div class="mb-3">
+            <%= form.fields_for :recipes, @timetable.recipes.find { |r| r.meal_type == "#{date.strftime("%A").downcase}_#{meal}" } do |recipe_form| %>
+              <%= recipe_form.hidden_field :meal_type, value: "#{date.strftime("%A").downcase}_#{meal}" %>
+              <%= recipe_form.label :ingredients, "Ingredients (comma separated)", class: 'form-label' %>
+              <%= recipe_form.text_area :ingredients, class: 'form-control ingredients' %>
+              <%= recipe_form.label :steps, "Steps", class: 'form-label' %>
+              <%= recipe_form.text_area :steps, class: 'form-control steps' %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  <% else %>
+    <p>Please select a valid start and end date to create a timetable.</p>
+  <% end %>
+
+  <div class="actions">
+    <%= form.submit class: 'btn btn-primary' %>
+  </div>
+<% end %>
