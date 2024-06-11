@@ -1,13 +1,25 @@
 <div class="container mt-4 mb-4">
-  <h1 class="text-center my-4">Timetable for <%= @timetable.start_date %> to <%= @timetable.end_date %></h1>
+  <h1 class="text-center my-4">Timetable for 
+    <% if @timetable.time_range_type == "month" %>
+      <%= @timetable.start_date.strftime("%B %Y") %> 
+    <% else %>
+      <%= @timetable.start_date %> to <%= @timetable.end_date %>
+    <% end %>
+  </h1>
 
   <div class="card p-4">
     <table class="table table-bordered table-hover">
       <thead class="thead-dark">
         <tr>
           <th>Meal/Day</th>
-          <% (@timetable.start_date..@timetable.end_date).each do |date| %>
-            <th><%= date.strftime("%A, %B %d") %></th>
+          <% if @timetable.time_range_type == "month" %>
+            <% Date.today.all_month.each do |date| %>
+              <th><%= date.strftime("%A, %B %d") %></th>
+            <% end %>
+          <% else %>
+            <% (@timetable.start_date..@timetable.end_date).each do |date| %>
+              <th><%= date.strftime("%A, %B %d") %></th>
+            <% end %>
           <% end %>
         </tr>
       </thead>
@@ -15,27 +27,56 @@
         <% %w[breakfast lunch dinner].each do |meal| %>
           <tr>
             <td><%= meal.capitalize %></td>
-            <% (@timetable.start_date..@timetable.end_date).each do |date| %>
-              <td>
-                <p><%= @timetable.send("#{date.strftime("%A").downcase}_#{meal}") %></p>
-                <% recipe = @timetable.recipes.find_by(meal_type: "#{date.strftime("%A").downcase}_#{meal}") %>
-                <% if recipe %>
-                  <p><strong>Ingredients:</strong></p>
-                  <ul class="ingredients list-unstyled">
-                    <% recipe.ingredients.split(',').each do |ingredient| %>
-                      <li><%= ingredient.strip %></li>
-                    <% end %>
-                  </ul>
-                  <p><strong>Steps:</strong></p>
-                  <ul class="steps list-unstyled">
-                    <% recipe.steps.split('.').each do |step| %>
-                      <li><%= step.strip %></li>
-                    <% end %>
-                  </ul>
-                <% else %>
-                  <p>No recipe available.</p>
-                <% end %>
-              </td>
+            <% if @timetable.time_range_type == "month" %>
+              <% Date.today.all_month.each do |date| %>
+                <td>
+                  <% weekday = date.strftime("%A").downcase %>
+                  <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
+                  <% if recipe %>
+                    <div class="recipe" data-toggle="modal" data-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>">
+                      <h4><%= recipe.meal_name %></h4>
+                      <ul class="ingredients">
+                        <% recipe.ingredients.split(',').each do |ingredient| %>
+                          <li><%= ingredient.strip %></li>
+                        <% end %>
+                      </ul>
+                      <h5>Steps:</h5>
+                      <ol class="steps">
+                        <% recipe.steps.split('.').each do |step| %>
+                          <li><%= step.strip %></li>
+                        <% end %>
+                      </ol>
+                    </div>
+                  <% else %>
+                    <p>No recipe available.</p>
+                  <% end %>
+                </td>
+              <% end %>
+            <% else %>
+              <% (@timetable.start_date..@timetable.end_date).each do |date| %>
+                <td>
+                  <% weekday = date.strftime("%A").downcase %>
+                  <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
+                  <% if recipe %>
+                    <div class="recipe" data-toggle="modal" data-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>">
+                      <h4><%= recipe.meal_name %></h4>
+                      <ul class="ingredients">
+                        <% recipe.ingredients.split(',').each do |ingredient| %>
+                          <li><%= ingredient.strip %></li>
+                        <% end %>
+                      </ul>
+                      <h5>Steps:</h5>
+                      <ol class="steps">
+                        <% recipe.steps.split('.').each do |step| %>
+                          <li><%= step.strip %></li>
+                        <% end %>
+                      </ol>
+                    </div>
+                  <% else %>
+                    <p>No recipe available.</p>
+                  <% end %>
+                </td>
+              <% end %>
             <% end %>
           </tr>
         <% end %>
@@ -48,3 +89,31 @@
     <%= link_to 'Back to Timetables', timetables_path, class: 'btn btn-secondary' %>
   </div>
 </div>
+
+<div class="modal" tabindex="-1" role="dialog" id="recipeModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Recipe Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="recipeModalBody">
+        <!-- Recipe details will be displayed here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+  $('.recipe').click(function() {
+    var meal = $(this).data('meal');
+    var date = $(this).data('date');
+    var modalBody = $('#recipeModalBody');
+    var recipeDetails = $(this).html();
+    modalBody.html('<h4>' + meal + ' - ' + date + '</h4>' + recipeDetails);
+  });
+});
+</script>

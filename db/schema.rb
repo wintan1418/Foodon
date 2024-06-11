@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_29_155512) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_11_173705) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,6 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_29_155512) do
     t.datetime "updated_at", null: false
     t.text "ingredients"
     t.text "steps"
+    t.string "meal_name"
     t.index ["timetable_id"], name: "index_recipes_on_timetable_id"
     t.index ["user_id"], name: "index_recipes_on_user_id"
   end
@@ -59,6 +60,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_29_155512) do
     t.date "week_start_date"
     t.date "start_date"
     t.date "end_date"
+    t.string "time_range_type"
     t.index ["user_id"], name: "index_timetables_on_user_id"
   end
 

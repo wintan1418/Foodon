@@ -15,15 +15,21 @@
     <tbody>
       <% @timetables.each do |timetable| %>
         <tr>
+          <td><%= timetable.time_range_type&.capitalize || 'Not specified' %></td> 
           <td>
-            <% if timetable.start_date && timetable.end_date %>
-              <%= (timetable.end_date - timetable.start_date).to_i >= 27 ? 'Monthly' : 'Weekly' %>
+            <% if timetable.time_range_type == "month" %>
+              First of the Month 
             <% else %>
-              Not specified
+              <%= timetable.start_date&.strftime("%B %d, %Y") || 'Not specified' %>
             <% end %>
           </td>
-          <td><%= timetable.start_date || 'Not specified' %></td>
-          <td><%= timetable.end_date || 'Not specified' %></td>
+          <td>
+            <% if timetable.time_range_type == "month" %>
+              End of the Month
+            <% else %>
+              <%= timetable.end_date&.strftime("%B %d, %Y") || 'Not specified' %>
+            <% end %>
+          </td>
           <td>
             <%= link_to 'Show', timetable_path(timetable), class: 'btn btn-info btn-sm' %>
             <%= link_to 'Edit', edit_timetable_path(timetable), class: 'btn btn-warning btn-sm' %>
