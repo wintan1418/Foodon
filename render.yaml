@@ -19,6 +19,7 @@ services:
           name: foodon_db # Reference your database name
           property: connectionString
       - key: RAILS_MASTER_KEY
+        generateValue: true  # Automatically generate a secure master key
       - key: RAILS_ENV 
         value: production
       - key: WEB_CONCURRENCY
