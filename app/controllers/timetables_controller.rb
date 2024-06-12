@@ -6,13 +6,19 @@ class TimetablesController < ApplicationController
     @timetables = current_user.timetables
   end
   def show
-    @timetable = Timetable.find(params[:id])
     if @timetable.time_range_type == "month"
-      # Set start_date and end_date based on the current month if they are nil
       @timetable.start_date ||= Date.today.beginning_of_month
       @timetable.end_date ||= Date.today.end_of_month
+
+      all_dates = (@timetable.start_date..@timetable.end_date).to_a
+      @dates = Kaminari.paginate_array(all_dates).page(params[:page]).per(7)
+    else
+      @dates = (@timetable.start_date..@timetable.end_date).to_a
+      @dates = Kaminari.paginate_array(@dates).page(params[:page]).per(7)
     end
   end
+
+  
   
   def new
     @timetable = Timetable.new
@@ -64,6 +70,10 @@ class TimetablesController < ApplicationController
 
   def set_user_for_recipes
     @timetable.recipes.each { |recipe| recipe.user = current_user }
+  end
+
+  def permitted_params
+    params.permit(:page)
   end
 
   def timetable_params

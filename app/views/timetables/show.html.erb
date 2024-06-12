@@ -12,14 +12,8 @@
       <thead class="thead-dark">
         <tr>
           <th>Meal/Day</th>
-          <% if @timetable.time_range_type == "month" %>
-            <% Date.today.all_month.each do |date| %>
-              <th><%= date.strftime("%A, %B %d") %></th>
-            <% end %>
-          <% else %>
-            <% (@timetable.start_date..@timetable.end_date).each do |date| %>
-              <th><%= date.strftime("%A, %B %d") %></th>
-            <% end %>
+          <% @dates.each do |date| %>
+            <th><%= date.strftime("%A, %B %d") %></th>
           <% end %>
         </tr>
       </thead>
@@ -27,63 +21,39 @@
         <% %w[breakfast lunch dinner].each do |meal| %>
           <tr>
             <td><%= meal.capitalize %></td>
-            <% if @timetable.time_range_type == "month" %>
-              <% Date.today.all_month.each do |date| %>
-                <td>
-                  <% weekday = date.strftime("%A").downcase %>
-                  <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
-                  <% if recipe %>
-                    <div class="recipe" data-bs-toggle="modal" data-bs-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>" data-recipe="<%= json_escape(recipe.to_json) %>">
-                      <h3><%= recipe.meal_name %></h3>
-                      <h4>Ingredients</h4>
-                      <ul class="ingredients">
-                        <% recipe.ingredients.split(',').each do |ingredient| %>
-                          <li><%= ingredient.strip %></li>
-                        <% end %>
-                      </ul>
-                      <h5>Steps:</h5>
-                      <ol class="steps">
-                        <% recipe.steps.split('.').each do |step| %>
-                          <li><%= step.strip %></li>
-                        <% end %>
-                      </ol>
-                    </div>
-                  <% else %>
-                    <p>No recipe available.</p>
-                  <% end %>
-                </td>
-              <% end %>
-            <% else %>
-              <% (@timetable.start_date..@timetable.end_date).each do |date| %>
-                <td>
-                  <% weekday = date.strftime("%A").downcase %>
-                  <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
-                  <% if recipe %>
-                    <div class="recipe" data-bs-toggle="modal" data-bs-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>" data-recipe="<%= json_escape(recipe.to_json) %>">
-                      <h3><%= recipe.meal_name %></h3>
-                      <h4>Ingredients</h4>
-                      <ul class="ingredients">
-                        <% recipe.ingredients.split(',').each do |ingredient| %>
-                          <li><%= ingredient.strip %></li>
-                        <% end %>
-                      </ul>
-                      <h5>Steps:</h5>
-                      <ol class="steps">
-                        <% recipe.steps.split('.').each do |step| %>
-                          <li><%= step.strip %></li>
-                        <% end %>
-                      </ol>
-                    </div>
-                  <% else %>
-                    <p>No recipe available.</p>
-                  <% end %>
-                </td>
-              <% end %>
+            <% @dates.each do |date| %>
+              <td>
+                <% weekday = date.strftime("%A").downcase %>
+                <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
+                <% if recipe %>
+                  <div class="recipe" data-bs-toggle="modal" data-bs-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>" data-recipe="<%= json_escape(recipe.to_json) %>">
+                    <h3><%= recipe.meal_name %></h3>
+                    <h4>Ingredients</h4>
+                    <ul class="ingredients">
+                      <% recipe.ingredients.split(',').each do |ingredient| %>
+                        <li><%= ingredient.strip %></li>
+                      <% end %>
+                    </ul>
+                    <h5>Steps:</h5>
+                    <ol class="steps">
+                      <% recipe.steps.split('.').each do |step| %>
+                        <li><%= step.strip %></li>
+                      <% end %>
+                    </ol>
+                  </div>
+                <% else %>
+                  <p>No recipe available.</p>
+                <% end %>
+              </td>
             <% end %>
           </tr>
         <% end %>
       </tbody>
     </table>
+  </div>
+
+  <div class="text-center my-4">
+    <%= paginate @dates %>
   </div>
 
   <div class="text-center my-4">
@@ -164,15 +134,4 @@ function isValidJson(jsonString) {
     return false;
   }
 }
-
 </script>
-
-<%# <style>
-  /* Meal Styling */
-
-
-
-
-  </style> %>
-
-
