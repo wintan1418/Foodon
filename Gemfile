@@ -26,6 +26,7 @@ gem 'importmap-rails'
 gem 'will_paginate', '~> 3.1.0'
 gem 'bootstrap-will_paginate', '~> 1.0.0'
 gem 'kaminari', '~> 1.2', '>= 1.2.2'
+gem 'sassc-rails'
 
 
 
