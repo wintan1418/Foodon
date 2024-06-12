@@ -121,6 +121,60 @@
   list-style-type: disc; /* Use bullets */
 }
 
+.ingredients li, .steps li {
+  color: blue;
+}
+/* Modal Styles */
+#recipeModal .modal-content {
+  border-radius: 10px; /* Rounded corners for a modern look */
+  overflow: hidden;    /* Prevent content from overflowing */
+}
+
+#recipeModal .modal-header {
+  background-color: #007bff;  /* Bootstrap primary color */
+  color: white;
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+}
+
+#recipeModal .modal-title {
+  font-size: 1.25rem; /* Slightly larger title */
+  font-weight: bold;
+}
+
+#recipeModal .modal-body {
+  padding: 20px;
+}
+
+#recipeModal .modal-footer {
+  background-color: #f8f9fa; /* Light background for the footer */
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+#recipeModal h3 { /* Meal Name */
+  color: #333;          /* Dark grey for good contrast */
+  font-size: 1.5rem;    /* Larger heading */
+  margin-bottom: 10px;  /* Add some spacing */
+}
+
+#recipeModal h4 { /* Ingredients/Steps Header */
+  color: #6c757d;       /* Greyish color */
+  font-size: 1.1rem;    /* Slightly smaller than the meal name */
+  margin-bottom: 5px;
+}
+
+#recipeModal ul,
+#recipeModal ol {
+  list-style: none; /* Remove default list styling */
+  padding-left: 0;
+}
+
+#recipeModal li {
+  margin-bottom: 5px;
+}
+
+
 
 /* Responsive Design (Optional) */
 @media (max-width: 768px) {

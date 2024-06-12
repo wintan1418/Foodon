@@ -33,8 +33,9 @@
                   <% weekday = date.strftime("%A").downcase %>
                   <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
                   <% if recipe %>
-                    <div class="recipe" data-toggle="modal" data-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>">
-                      <h4><%= recipe.meal_name %></h4>
+                    <div class="recipe" data-bs-toggle="modal" data-bs-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>" data-recipe="<%= json_escape(recipe.to_json) %>">
+                      <h3><%= recipe.meal_name %></h3>
+                      <h4>Ingredients</h4>
                       <ul class="ingredients">
                         <% recipe.ingredients.split(',').each do |ingredient| %>
                           <li><%= ingredient.strip %></li>
@@ -58,8 +59,9 @@
                   <% weekday = date.strftime("%A").downcase %>
                   <% recipe = @timetable.recipes.find_by(meal_type: "#{weekday}_#{meal}") %>
                   <% if recipe %>
-                    <div class="recipe" data-toggle="modal" data-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>">
-                      <h4><%= recipe.meal_name %></h4>
+                    <div class="recipe" data-bs-toggle="modal" data-bs-target="#recipeModal" data-meal="<%= meal %>" data-date="<%= date.strftime("%A, %B %d") %>" data-recipe="<%= json_escape(recipe.to_json) %>">
+                      <h3><%= recipe.meal_name %></h3>
+                      <h4>Ingredients</h4>
                       <ul class="ingredients">
                         <% recipe.ingredients.split(',').each do |ingredient| %>
                           <li><%= ingredient.strip %></li>
@@ -90,17 +92,18 @@
   </div>
 </div>
 
-<div class="modal" tabindex="-1" role="dialog" id="recipeModal">
+<div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Recipe Details</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title" id="recipeModalLabel">Recipe Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="recipeModalBody">
         <!-- Recipe details will be displayed here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -108,12 +111,68 @@
 
 <script>
   $(document).ready(function() {
-  $('.recipe').click(function() {
-    var meal = $(this).data('meal');
-    var date = $(this).data('date');
-    var modalBody = $('#recipeModalBody');
-    var recipeDetails = $(this).html();
-    modalBody.html('<h4>' + meal + ' - ' + date + '</h4>' + recipeDetails);
-  });
+    $('.recipe').on('click', function() {
+        const meal = $(this).data('meal');
+        const date = $(this).data('date');
+
+        // Retrieve the recipe data as a string using the attr() method
+        const recipeString = $(this).attr('data-recipe'); 
+
+        // Check if recipeString is a valid JSON string before parsing
+        if (recipeString && isValidJson(recipeString)) {
+            try {
+                const recipe = JSON.parse(recipeString); 
+
+                const modalBody = $('#recipeModalBody');
+                const modalTitle = $('#recipeModalLabel');
+
+                // Set modal title
+                modalTitle.text(`${meal.charAt(0).toUpperCase() + meal.slice(1)} - ${date}`);
+
+                // Build the recipe details
+                let recipeDetails = `<h3>${recipe.meal_name}</h3>`;
+                recipeDetails += '<h4>Ingredients:</h4><ul>';
+                recipe.ingredients.split(',').forEach(ingredient => {
+                    recipeDetails += `<li>${ingredient.trim()}</li>`;
+                });
+                recipeDetails += '</ul>';
+                recipeDetails += '<h5>Steps:</h5><ol>';
+                recipe.steps.split('.').forEach(step => {
+                    recipeDetails += `<li>${step.trim()}</li>`;
+                });
+                recipeDetails += '</ol>';
+
+                // Set modal body
+                modalBody.html(recipeDetails);
+            } catch (error) {
+                console.error("Error parsing recipe data:", error);
+                modalBody.html('<p>Error loading recipe details.</p>');
+            }
+        } else {
+            modalBody.html('<p>No recipe data found or invalid JSON.</p>');
+        }
+
+        $('#recipeModal').modal('show'); 
+    });
 });
+
+function isValidJson(jsonString) {
+  try {
+    JSON.parse(jsonString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 </script>
+
+<%# <style>
+  /* Meal Styling */
+
+
+
+
+  </style> %>
+
+
