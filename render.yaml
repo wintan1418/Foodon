@@ -1,0 +1,26 @@
+databases:
+  - name: foodon_db # Give your database a descriptive name
+    databaseName: foodon_db  # Usually the same as the name
+    user: foodon_user # Create a specific user for your database
+    plan: free # or 'standard-0' if you need more resources
+
+services:
+  - type: web
+    name: foodon # Name your web service
+    runtime: ruby 
+    plan: free # Or a paid plan if you need more resources
+    buildCommand: "./bin/render-build.sh"
+    # Pre-deploy Command (Only for Paid Plans):
+    # preDeployCommand: "bundle exec rails db:migrate" 
+    startCommand: "bundle exec rails server -p 3000" # Start Rails server on port 3000
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foodon_db # Reference your database name
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        generateValue: true  # Automatically generate a secure master key
+      - key: RAILS_ENV 
+        value: production
+      - key: WEB_CONCURRENCY
+        value: 2
