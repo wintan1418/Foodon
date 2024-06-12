@@ -1,4 +1,5 @@
-<%= form_with(model: @timetable, local: true) do |form| %>
+<div class="form-container">
+  <%= form_with(model: @timetable, local: true) do |form| %>
   <% if @timetable.errors.any? %>
     <div id="error_explanation" class="alert alert-danger">
       <h4><%= pluralize(@timetable.errors.count, "error") %> prohibited this timetable from being saved:</h4>
@@ -11,41 +12,127 @@
   <% end %>
 
   <div class="mb-3">
-    <%= form.label :week_start_date, class: 'form-label' %>
-    <%= form.date_field :week_start_date, class: 'form-control', value: @start_date %>
+    <%= form.label :time_range_type, "Time Range", class: 'form-label' %>
+    <%= form.select :time_range_type, options_for_select([["Month", "month"], ["Week", "week"], ["Custom", "custom"]]), {}, { class: 'form-control', id: 'time_range_type' } %>
   </div>
 
-  <div class="mb-3">
-    <%= form.label :end_date, class: 'form-label' %>
-    <%= form.date_field :end_date, class: 'form-control', value: @end_date %>
+  <div class="mb-3" id="date_fields">
+    <!-- Date fields will be inserted here by JavaScript based on the selected time range type -->
   </div>
 
-  <% if @start_date && @end_date %>
-    <% (@start_date..@end_date).each do |date| %>
-      <h2 class="mt-4"><%= date.strftime("%A, %B %d, %Y") %></h2>
-
-      <% %w[breakfast lunch dinner].each do |meal| %>
+  <div id="timetable_fields">
+    <!-- Meal fields will be generated here by JavaScript based on the selected date range -->
+    <% if @timetable.recipes.any? %>
+      <% @timetable.recipes.each do |recipe| %>
         <div class="meal">
-          <h3><%= meal.capitalize %></h3>
-          <%= form.text_area "#{date.strftime("%A").downcase}_#{meal}", class: 'form-control' %>
-          <h4>Recipe</h4>
-          <div class="mb-3">
-            <%= form.fields_for :recipes, @timetable.recipes.find { |r| r.meal_type == "#{date.strftime("%A").downcase}_#{meal}" } do |recipe_form| %>
-              <%= recipe_form.hidden_field :meal_type, value: "#{date.strftime("%A").downcase}_#{meal}" %>
-              <%= recipe_form.label :ingredients, "Ingredients (comma separated)", class: 'form-label' %>
-              <%= recipe_form.text_area :ingredients, class: 'form-control ingredients' %>
-              <%= recipe_form.label :steps, "Steps", class: 'form-label' %>
-              <%= recipe_form.text_area :steps, class: 'form-control steps' %>
-            <% end %>
-          </div>
+          <%= form.hidden_field :id, value: recipe.id %>
+          <%= form.label "#{recipe.meal_type}", "#{recipe.meal_type.humanize}", class: 'form-label' %>
+          <%= form.text_field :meal_name, value: recipe.meal_name, class: 'form-control', placeholder: "Name of the meal for #{recipe.meal_type}" %>
+          <%= form.text_area :ingredients, value: recipe.ingredients, class: 'form-control', placeholder: "Ingredients for #{recipe.meal_type}" %>
+          <%= form.text_area :steps, value: recipe.steps, class: 'form-control', placeholder: "Steps for #{recipe.meal_type}" %>
+          <%= form.hidden_field :meal_type, value: recipe.meal_type %>
         </div>
       <% end %>
+    <% else %>
+      <% ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].each do |day| %>
+        <% ["breakfast", "lunch", "dinner"].each do |meal| %>
+          <div class="meal">
+            <h3><%= "#{day.capitalize} #{meal.capitalize}" %></h3>
+            <%= form.hidden_field :meal_type, value: "#{day}_#{meal}" %>
+            <%= form.text_field :meal_name, class: 'form-control', placeholder: "Name of the meal for #{day.capitalize} #{meal.capitalize}" %>
+            <%= form.text_area :ingredients, class: 'form-control', placeholder: "Ingredients for #{day.capitalize} #{meal.capitalize}" %>
+            <%= form.text_area :steps, class: 'form-control', placeholder: "Steps for #{day.capitalize} #{meal.capitalize}" %>
+          </div>
+        <% end %>
+      <% end %>
     <% end %>
-  <% else %>
-    <p>Please select a valid start and end date to create a timetable.</p>
-  <% end %>
+  </div>
 
   <div class="actions">
     <%= form.submit class: 'btn btn-primary' %>
   </div>
 <% end %>
+  </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const timeRangeTypeSelect = document.getElementById("time_range_type");
+    const dateFieldsDiv = document.getElementById("date_fields");
+    const timetableFieldsDiv = document.getElementById("timetable_fields");
+
+    function updateDateFields() {
+      const selectedType = timeRangeTypeSelect.value;
+      dateFieldsDiv.innerHTML = "";
+
+      if (selectedType === "month") {
+        const monthField = document.createElement("input");
+        monthField.setAttribute("type", "month");
+        monthField.setAttribute("name", "timetable[month]");
+        monthField.className = "form-control";
+        dateFieldsDiv.appendChild(monthField);
+      } else if (selectedType === "week") {
+        const weekField = document.createElement("input");
+        weekField.setAttribute("type", "week");
+        weekField.setAttribute("name", "timetable[week]");
+        weekField.className = "form-control";
+        dateFieldsDiv.appendChild(weekField);
+      } else if (selectedType === "custom") {
+        const startDateField = document.createElement("input");
+        startDateField.setAttribute("type", "date");
+        startDateField.setAttribute("name", "timetable[start_date]");
+        startDateField.className = "form-control";
+        dateFieldsDiv.appendChild(startDateField);
+
+        const endDateField = document.createElement("input");
+        endDateField.setAttribute("type", "date");
+        endDateField.setAttribute("name", "timetable[end_date]");
+        endDateField.className = "form-control";
+        dateFieldsDiv.appendChild(endDateField);
+      }
+
+      updateTimetableFields();
+    }
+
+    function updateTimetableFields() {
+      const selectedType = timeRangeTypeSelect.value;
+      timetableFieldsDiv.innerHTML = "";
+
+      if (selectedType === "month") {
+        ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].forEach(day => {
+          ["breakfast", "lunch", "dinner"].forEach(meal => {
+            const mealType = `${day}_${meal}`;
+            timetableFieldsDiv.innerHTML += `
+              <div class="meal">
+                <h3>${mealType.replace('_', ' ').toUpperCase()}</h3>
+                <input type="hidden" name="timetable[recipes_attributes][][meal_type]" value="${mealType}">
+                <input type="text" name="timetable[recipes_attributes][][meal_name]" class="form-control" placeholder="Name of the meal for ${mealType}">
+                <textarea name="timetable[recipes_attributes][][ingredients]" class="form-control" placeholder="Ingredients for ${mealType}"></textarea>
+                <textarea name="timetable[recipes_attributes][][steps]" class="form-control" placeholder="Steps for ${mealType}"></textarea>
+              </div>
+            `;
+          });
+        });
+      } else if (selectedType === "week" || selectedType === "custom") {
+        // Logic for week and custom (similar to the current implementation)
+        ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].forEach(day => {
+          ["breakfast", "lunch", "dinner"].forEach(meal => {
+            const mealType = `${day}_${meal}`;
+            timetableFieldsDiv.innerHTML += `
+              <div class="meal">
+                <h3>${mealType.replace('_', ' ').toUpperCase()}</h3>
+                <input type="hidden" name="timetable[recipes_attributes][][meal_type]" value="${mealType}">
+                <input type="text" name="timetable[recipes_attributes][][meal_name]" class="form-control" placeholder="Name of the meal for ${mealType}">
+                <textarea name="timetable[recipes_attributes][][ingredients]" class="form-control" placeholder="Ingredients for ${mealType}"></textarea>
+                <textarea name="timetable[recipes_attributes][][steps]" class="form-control" placeholder="Steps for ${mealType}"></textarea>
+              </div>
+            `;
+          });
+        });
+      }
+    }
+
+    timeRangeTypeSelect.addEventListener("change", updateDateFields);
+    dateFieldsDiv.addEventListener("change", updateTimetableFields);
+    updateDateFields();
+  });
+</script>

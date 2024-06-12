@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Foodon</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<head>
+  <title>Foodon</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
-    
-  </head>
+  <!-- Load jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-  <body>
+  <!-- Preload CSS files -->
+  <link rel="preload" href="<%= asset_path('application.css') %>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="<%= asset_path('custom.css') %>" as="style" onload="this.onload=null;this.rel='stylesheet'">
 
-    <%= yield %>
-  </body>
+  <!-- Fallback for non-JS environments -->
+  <noscript>
+    <link rel="stylesheet" href="<%= asset_path('application.css') %>">
+    <link rel="stylesheet" href="<%= asset_path('custom.css') %>">
+  </noscript>
+
+  <!-- Regular stylesheet links for Turbo links -->
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "custom", media: "all", data: { turbolinks: false } %>
+</head>
+
+<body>
+  <%= yield %>
+
+  <!-- JavaScript files -->
+  <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+</body>
 </html>
