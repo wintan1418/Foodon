@@ -82,5 +82,4 @@ test:
 production:
   <<: *default
   database: Foodon_production
-  username: Foodon_user
   password: <%= ENV["FOODON_DATABASE_PASSWORD"] %>
