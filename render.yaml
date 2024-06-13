@@ -12,7 +12,7 @@ services:
     buildCommand: "./bin/render-build.sh"
     # Pre-deploy Command (Only for Paid Plans):
     # preDeployCommand: "bundle exec rails db:migrate" 
-    startCommand: "bundle exec rails server -p 3000" # Start Rails server on port 3000
+    startCommand: "bundle exec rails db:migrate && bundle exec rails server"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
