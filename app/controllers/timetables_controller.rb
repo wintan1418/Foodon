@@ -6,6 +6,8 @@ class TimetablesController < ApplicationController
     @timetables = current_user.timetables
   end
   def show
+    @timetable = Timetable.find(params[:id])
+
     if @timetable.time_range_type == "month"
       @timetable.start_date ||= Date.today.beginning_of_month
       @timetable.end_date ||= Date.today.end_of_month
