@@ -37,8 +37,11 @@
           <li class="nav-item">
             <%= link_to 'Timetables', timetables_path, class: 'nav-link' %>
           </li>
+         <li class="nav-item">
+            <%= link_to 'Profile', profile_user_path(current_user), class: 'nav-link' %>
+          </li>
           <li class="nav-item">
-            <%= link_to 'Sign Out', destroy_user_session_path, method: :delete, class: 'nav-link' %>
+            <%= button_to 'Sign Out', destroy_user_session_path, method: :delete, class: 'nav-link' %>
           </li>
         <% else %>
           <li class="nav-item">
@@ -63,6 +66,7 @@
 
   <div class="container mt-5">
     <%= yield %>
+      <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </div>
 </body>
 </html>

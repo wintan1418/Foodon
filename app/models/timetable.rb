@@ -1,4 +1,5 @@
 class Timetable < ApplicationRecord
+  has_one_attached :image
   belongs_to :user
   has_many :recipes, dependent: :destroy
   accepts_nested_attributes_for :recipes, allow_destroy: true
