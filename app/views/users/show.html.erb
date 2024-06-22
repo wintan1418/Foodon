@@ -1,0 +1,21 @@
+<h1><%= @user.email %></h1> <!-- Change to @user.name if you have a name attribute -->
+
+<% if current_user.following?(@user) %>
+  <%= button_to 'Unfollow', unfollow_user_path(@user), method: :delete, class: 'btn btn-danger' %>
+<% else %>
+  <%= button_to 'Follow', follow_user_path(@user), method: :post, class: 'btn btn-primary' %>
+<% end %>
+
+<h2>Followers</h2>
+<ul>
+  <% @user.followers.each do |follower| %>
+    <li><%= link_to follower.email, user_path(follower) %></li> <!-- Change to follower.name if you have a name attribute -->
+  <% end %>
+</ul>
+
+<h2>Following</h2>
+<ul>
+  <% @user.followees.each do |followee| %>
+    <li><%= link_to followee.email, user_path(followee) %></li> <!-- Change to followee.name if you have a name attribute -->
+  <% end %>
+</ul>

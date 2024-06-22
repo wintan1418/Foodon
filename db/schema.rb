@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_22_134056) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_22_135645) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -56,6 +56,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_22_134056) do
     t.index ["user_id"], name: "index_recipes_on_user_id"
   end
 
+  create_table "relationships", force: :cascade do |t|
+    t.integer "follower_id"
+    t.integer "followee_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["follower_id", "followee_id"], name: "index_relationships_on_follower_id_and_followee_id", unique: true
+  end
+
   create_table "timetables", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.date "date"
@@ -89,6 +97,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_22_134056) do
     t.date "start_date"
     t.date "end_date"
     t.string "time_range_type"
+    t.boolean "public"
     t.index ["user_id"], name: "index_timetables_on_user_id"
   end
 
@@ -108,5 +117,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_22_134056) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "recipes", "timetables"
   add_foreign_key "recipes", "users"
+  add_foreign_key "relationships", "users", column: "followee_id"
+  add_foreign_key "relationships", "users", column: "follower_id"
   add_foreign_key "timetables", "users"
 end
