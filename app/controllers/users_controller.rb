@@ -2,9 +2,8 @@ class UsersController < ApplicationController
   before_action :authenticate_user!, except: [:index, :show]
 
   def index
-    @users = User.all
+    @users = User.where.not(id: current_user.id)
   end
-
   def show
     @user = User.find(params[:id])
     @timetables = @user.timetables
@@ -15,6 +14,8 @@ class UsersController < ApplicationController
     @followers = @user.followers
     @following = @user.followees
     @timetables = @user.timetables
+    @users = User.where.not(id: current_user.id)
+
   end
 
   def follow
